@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="FileTransfer-CL">
+    <output-path>$PROJECT_DIR$/out/artifacts/FileTransfer_CL</output-path>
+    <root id="archive" name="FileTransfer-CL.jar">
+      <element id="module-output" name="FileTransfers" />
+    </root>
+  </artifact>
+</component>
