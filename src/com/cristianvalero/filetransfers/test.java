@@ -1,17 +1,26 @@
 package com.cristianvalero.filetransfers;
 
+import org.apache.commons.codec.binary.Base64;
+
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
 
 public class test
 {
     public static void main(String args[]) throws IOException, InterruptedException
     {
-        Calendar cal = Calendar.getInstance();
-        System.out.println(cal.get(Calendar.DAY_OF_MONTH));
+        String a = "255";
+        byte[] bytesEncoded = Base64.encodeBase64(a.getBytes());
+        String encoded = new String(bytesEncoded);
+        System.out.println("Ecncoded value is " + encoded);
 
+        byte[] valueDecoded= Base64.decodeBase64(bytesEncoded);
+        String b = new String(valueDecoded);
+        System.out.println("Decoded value is " + b);
+
+        for (byte c : encoded.getBytes())
+            System.out.println(c);
 
         /**byte a[] = new byte[5];
         for (int i=0; i<a.length; i++)
@@ -30,7 +39,7 @@ public class test
             //Thread.sleep(1*1000);
         }*/
 
-        /**Buscador frame = new Buscador();
+        /*Buscador frame = new Buscador();
         frame.setVisible(true);*/
     }
 
@@ -40,7 +49,7 @@ public class test
         {
             JFileChooser fc = new JFileChooser();
             fc.setMultiSelectionEnabled(true);
-            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
             int seleccion = fc.showOpenDialog(new JPanel());
 
@@ -48,12 +57,12 @@ public class test
             {
                 File[] ficheros = fc.getSelectedFiles();
 
-                for(int i=0; i<ficheros.length; i++)
+                for(File f : ficheros)
                 {
-                    if (ficheros[i].isDirectory())
-                        System.out.println("Carpeta: "+ficheros[i].getPath());
-                    else if (ficheros[i].isFile())
-                        System.out.println("Fichero: "+ficheros[i].getPath());
+                    if (f.isDirectory())
+                        System.out.println("Carpeta: "+f.getPath());
+                    else if (f.isFile())
+                        System.out.println("Fichero: "+f.getPath());
                 }
                 System.exit(1);
             }

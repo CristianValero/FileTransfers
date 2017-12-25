@@ -232,7 +232,7 @@ public class Server extends Thread
             }
         }
 
-        public void saveNewDownload(String adress, String fileName, float sizemb, String path)
+        public void saveNewDownload(String adress, String fileName, String sizemb, String path)
         {
             Calendar cal = Calendar.getInstance();
 
@@ -255,9 +255,9 @@ public class Server extends Thread
             query.append(adress);
             query.append("', '");
             query.append(fileName);
-            query.append("', ");
+            query.append("', '");
             query.append(sizemb);
-            query.append(", '");
+            query.append("', '");
             query.append(path);
             query.append("', '");
             query.append(day);
@@ -274,7 +274,7 @@ public class Server extends Thread
             }
         }
 
-        public void saveNewUpload(String adress, String fileName, float sizemb, String path)
+        public void saveNewUpload(String adress, String fileName, String sizemb, String path)
         {
             Calendar cal = Calendar.getInstance();
 
@@ -297,9 +297,9 @@ public class Server extends Thread
             query.append(adress);
             query.append("', '");
             query.append(fileName);
-            query.append("', ");
+            query.append("', '");
             query.append(sizemb);
-            query.append(", '");
+            query.append("', '");
             query.append(path);
             query.append("', '");
             query.append(day);

@@ -1,5 +1,6 @@
 package com.cristianvalero.filetransfers.server;
 
+import com.cristianvalero.filetransfers.Utils.Colors;
 import com.cristianvalero.filetransfers.Utils.Utils;
 
 import java.io.DataInputStream;
@@ -7,13 +8,15 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 public class Actions
 {
     private PClient client;
     private DataOutputStream dos;
     private DataInputStream dis;
+    private String address;
 
     private ActionDoing actionDoing = ActionDoing.NONE;
 
@@ -22,6 +25,8 @@ public class Actions
         this.client = c;
         dos = client.getDos();
         dis = client.getDis();
+
+        address = client.getSocket().getInetAddress().getHostAddress();
     }
 
     public ActionDoing getAction()
@@ -39,6 +44,11 @@ public class Actions
                 dos.writeUTF(entry.getName());
                 dos.flush();
             }
+            else
+            {
+                dos.writeUTF("COOMING SOON -> "+entry.getName()+"\\");
+                dos.flush();
+            }
         }
     }
 
@@ -50,6 +60,39 @@ public class Actions
         folder.append(file.getFileName());
 
         Files.write(new File(folder.toString()).toPath(), file.getFile());
+
+        final String mb = bytesToMegabyte(file.getSize());
+
+        Server.getDatabase().saveNewUpload(address, file.getFileName(), bytesToMegabyte(file.getSize()), folder.toString());
+
+        Utils.logMessage(Colors.GREEN+"A new file has been uploaded and saved into uploads folder: "+file.getFileName()+" ("+mb+").");
+    }
+
+    public static String bytesToMegabyte(int bytes)
+    {
+        DecimalFormat decimalFormat = new DecimalFormat("#.000");
+        float megabytes = (float) (bytes / Math.pow(2, 20));
+        //decimalFormat.setRoundingMode(RoundingMode.CEILING);
+        return decimalFormat.format(megabytes);
+    }
+
+    public void sendInfo() throws IOException
+    {
+        ArrayList<String> help = new ArrayList<>();
+        help.add("DOWNLOAD <filename>     You can download the typed filename if exists.");
+        help.add("UPLOAD <filename>       Select a file in the explorer for upload to the server.");
+        help.add("LIST                    Get a list of all avaliable items to download.");
+        help.add("HELP                    Get this information.");
+        help.add("CLOSE                   Close the connection to the server and this program.");
+
+        for (String h : help)
+        {
+            dos.writeUTF(h);
+            dos.flush();
+        }
+
+        help.clear();
+        help = null;
     }
 
     public FileUtil getFileUploaded() throws IOException
@@ -81,20 +124,27 @@ public class Actions
         return new FileUtil(file, size, fileName);
     }
 
-    public void sendFile(File f) throws IOException
+    public void sendFile() throws IOException
     {
         actionDoing = ActionDoing.DOWNLOADING;
 
-        byte[] file = Files.readAllBytes(f.toPath());
+        String programPath = new File(".").getCanonicalPath()+"\\uploads\\";
+
+        final String fileName = dis.readUTF(); //Get the name of the file
+        programPath += fileName;
+
+        byte[] file = Files.readAllBytes(new File(programPath).toPath());
 
         dos.writeInt(file.length); //Send size of the file
         dos.flush();
 
-        for (int i=0; i<file.length; i++)
+        for (int i=0; i<file.length; i++) //Send byte per byte of the file
         {
             dos.writeByte(file[i]);
             dos.flush();
         }
+
+        Server.getDatabase().saveNewDownload(address, fileName, bytesToMegabyte(file.length), programPath);
 
         actionDoing = ActionDoing.NONE;
     }
@@ -103,7 +153,7 @@ public class Actions
     {
         DOWNLOADING ("dwnldng"),
         UPLOADING ("upldng"),
-        NONE ("NNE");
+        NONE ("none");
 
         private String action;
 

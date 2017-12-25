@@ -1,5 +1,8 @@
 package com.cristianvalero.filetransfers.server;
 
+import com.cristianvalero.filetransfers.Utils.Colors;
+import com.cristianvalero.filetransfers.Utils.Utils;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,11 +16,14 @@ public class PClient implements Runnable
     private Actions actions;
 
     private Thread actualThread = null;
+    private String address;
 
     public PClient(Socket socket)
     {
         this.socket = socket;
         actions = new Actions(this);
+
+        this.address = socket.getInetAddress().getHostAddress();
     }
 
     @Override
@@ -28,36 +34,53 @@ public class PClient implements Runnable
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
 
-            dos.writeUTF("g"); //Confirm the correct connection to the client
+            dos.writeUTF("acptd"); //Confirm the correct connection to the client
             dos.flush();
 
             while (socket.isConnected())
             {
                 if (actions.getAction() == Actions.ActionDoing.NONE) //If is not working in any task.
                 {
-                    final String toDo = dis.readUTF();
+                    final String toDo = dis.readUTF().toLowerCase();
+                    Utils.logMessage(address+" executed '"+Colors.BLUE+toDo+Colors.RESET+"' command.");
 
                     switch (toDo)
                     {
                         case "upload":
+                            actions.saveFile(actions.getFileUploaded());
                             break;
                         case "download":
-                            break;
-                        case "init":
+                            actions.sendFile();
                             break;
                         case "close":
+                            close_all();
                             break;
+                        case "help":
+                            actions.sendInfo();
+                            break;
+                        case "list":
+                            actions.sendListOfFilesAvaliable();
+                            break;
+                        default:
+                            dos.writeUTF(Colors.RED+"The command '"+toDo+"' not exists."+Colors.RESET);
+                                break;
                     }
                 }
             }
 
-            Server.removeClient(this);
-            actualThread.interrupt();
+            close_all();
         }
         catch (IOException e)
         {
+            Utils.logMessage("An error has ocurred when try to execute any action.");
             e.printStackTrace();
         }
+    }
+
+    private void close_all()
+    {
+        Server.removeClient(this);
+        actualThread.interrupt();
     }
 
     public DataInputStream getDis() {
@@ -73,8 +96,5 @@ public class PClient implements Runnable
         return socket;
     }
 
-    public void setActualThread(Thread a)
-    {
-        this.actualThread = a;
-    }
+    public void setActualThread(Thread a) { this.actualThread = a; }
 }
