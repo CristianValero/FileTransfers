@@ -1,7 +1,7 @@
-package com.cristianvalero.filetransfers.server;
+package com.cristianvalero.filetransfers.main.server;
 
-import com.cristianvalero.filetransfers.Utils.Colors;
-import com.cristianvalero.filetransfers.Utils.Utils;
+import com.cristianvalero.filetransfers.main.Utils.Colors;
+import com.cristianvalero.filetransfers.main.Utils.Utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

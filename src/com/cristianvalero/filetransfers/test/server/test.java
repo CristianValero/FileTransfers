@@ -1,6 +1,4 @@
-package com.cristianvalero.filetransfers;
-
-import org.apache.commons.codec.binary.Base64;
+package com.cristianvalero.filetransfers.test.server;
 
 import javax.swing.*;
 import java.io.File;
@@ -10,7 +8,7 @@ public class test
 {
     public static void main(String args[]) throws IOException, InterruptedException
     {
-        String a = "255";
+        /**String a = "255";
         byte[] bytesEncoded = Base64.encodeBase64(a.getBytes());
         String encoded = new String(bytesEncoded);
         System.out.println("Ecncoded value is " + encoded);
@@ -20,7 +18,7 @@ public class test
         System.out.println("Decoded value is " + b);
 
         for (byte c : encoded.getBytes())
-            System.out.println(c);
+            System.out.println(c);*/
 
         /**byte a[] = new byte[5];
         for (int i=0; i<a.length; i++)

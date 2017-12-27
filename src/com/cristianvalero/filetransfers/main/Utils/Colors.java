@@ -1,4 +1,4 @@
-package com.cristianvalero.filetransfers.Utils;
+package com.cristianvalero.filetransfers.main.Utils;
 
 public enum Colors
 {

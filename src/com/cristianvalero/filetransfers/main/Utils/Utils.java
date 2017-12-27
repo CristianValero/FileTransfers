@@ -1,4 +1,4 @@
-package com.cristianvalero.filetransfers.Utils;
+package com.cristianvalero.filetransfers.main.Utils;
 
 import com.sun.istack.internal.NotNull;
 import org.apache.commons.codec.digest.DigestUtils;
