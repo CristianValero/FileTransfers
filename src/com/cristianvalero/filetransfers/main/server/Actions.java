@@ -92,7 +92,6 @@ public class Actions
         }
 
         help.clear();
-        help = null;
     }
 
     public FileUtil getFileUploaded() throws IOException
@@ -111,6 +110,8 @@ public class Actions
             final int percnt = (100*i) / file.length;
 
             file[i] = dis.readByte();
+            dos.writeUTF(fileName+": "+percnt+"%");
+            dos.flush();
 
             if (percnt != latestIndex)
             {
