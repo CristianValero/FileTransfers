@@ -37,6 +37,7 @@ public class Actions
     public void sendListOfFilesAvaliable() throws IOException
     {
         final File folder = new File(new File(".").getCanonicalPath()+"\\uploads");
+        dos.writeInt(folder.listFiles().length);
         for (final File entry : folder.listFiles())
         {
             if (!entry.isDirectory())

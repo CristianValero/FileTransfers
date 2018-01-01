@@ -1,11 +1,15 @@
 package com.cristianvalero.filetransfers.main.client;
 
+import com.cristianvalero.filetransfers.main.Utils.Utils;
+
 import javax.swing.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public enum Actions
@@ -45,6 +49,69 @@ public enum Actions
 
     }
 
+    public void downloadFile(DataInputStream dis, DataOutputStream dos) throws IOException
+    {
+        now = Actions.DOWNLOADING;
+
+        System.out.println("There are this files avaliables to download: ");
+        dos.writeUTF("list");
+        dos.flush();
+        final int totalFiles = dis.readInt();
+
+        ArrayList<String> fileNames = new ArrayList<>();
+        for (int i=0; i<totalFiles; i++)
+        {
+            final String fileName = dis.readUTF();
+            fileNames.add(fileName);
+            System.out.println(fileName);
+        }
+
+        String fileToDownload;
+        boolean exists;
+        Scanner teclado = new Scanner(System.in);
+        do
+        {
+            System.out.print("Write the name of the file (case sensitive): ");
+            fileToDownload = teclado.nextLine();
+            exists = containsString(fileNames, fileToDownload);
+        } while (!exists);
+        teclado.close();
+
+        dos.writeUTF(fileToDownload);
+        dos.flush();
+
+        final int fileSize = dis.readInt();
+        byte[] file = new byte[fileSize];
+        int latestIndex = -1;
+
+        System.out.println("The file will be download into your desktop.");
+
+        for (int i=0; i<fileSize; i++)
+        {
+            file[i] = dis.readByte();
+            final int percnt = (100*i) / file.length;
+
+            if (percnt != latestIndex)
+            {
+                System.out.println(" -> "+fileToDownload+": "+percnt+"% downloaded.");
+                latestIndex = percnt;
+            }
+        }
+
+        Files.write(new File("C://users//"+System.getProperty("user.name")+"//Desktop//"+fileToDownload).toPath(), file);
+
+        now = Actions.NONE;
+    }
+
+    private boolean containsString(ArrayList<String> a, String find)
+    {
+        boolean exists = false;
+        for (String i : a)
+            if (i.equals(find))
+                exists = true;
+        return exists;
+    }
+
     public void uploadFile(DataInputStream dis, DataOutputStream dos) throws IOException
     {
         now = Actions.UPLOADING;
@@ -67,11 +134,20 @@ public enum Actions
             dos.writeUTF(file.getFileName());
             dos.flush();
 
-            for (byte b : file.getFile())
+            int latestIndex = -1;
+            byte[] b = file.getFile();
+            for (int i=0; i<b.length; i++)
             {
-                dos.writeByte(b);
+                final int percnt = (100*i) / b.length;
+                dos.writeByte(b[i]);
                 dos.flush();
                 System.out.println(dis.readUTF());
+
+                if (percnt != latestIndex)
+                {
+                    System.out.println(" -> "+file.getFileName()+": "+percnt+"% uploaded.");
+                    latestIndex = percnt;
+                }
             }
         }
 
@@ -123,6 +199,7 @@ public enum Actions
             this.file = f;
             this.size = s;
             this.fileName = n;
+            this.path = p;
         }
 
         public byte[] getFile() {
