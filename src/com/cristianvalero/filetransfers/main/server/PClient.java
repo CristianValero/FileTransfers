@@ -21,8 +21,6 @@ public class PClient implements Runnable
     public PClient(Socket socket)
     {
         this.socket = socket;
-        actions = new Actions(this);
-
         this.address = socket.getInetAddress().getHostAddress();
     }
 
@@ -33,6 +31,8 @@ public class PClient implements Runnable
         {
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
+
+            actions = new Actions(this);
 
             dos.writeUTF("acptd"); //Confirm the correct connection to the client
             dos.flush();
@@ -77,9 +77,12 @@ public class PClient implements Runnable
         }
     }
 
-    private void close_all()
+    private void close_all() throws IOException
     {
         Server.removeClient(this);
+        dos.close();
+        dis.close();
+        socket.close();
         actualThread.interrupt();
     }
 

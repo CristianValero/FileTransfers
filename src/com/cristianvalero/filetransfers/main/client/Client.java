@@ -20,6 +20,8 @@ public class Client extends Thread
     private Socket socket;
     private Actions actions;
 
+    private Scanner teclado;
+
     public static void main(String args[]) throws IOException
     {
         showCopiright();
@@ -30,7 +32,7 @@ public class Client extends Thread
 
         File cnfg = new File(CONFG);
         if (!cnfg.exists())
-            cnfg.mkdir();
+            cnfg.mkdirs();
 
         Client client = new Client();
         client.run();
@@ -39,6 +41,7 @@ public class Client extends Thread
     @Override
     public void run()
     {
+        teclado = new Scanner(System.in);
         setConnection();
 
         try
@@ -53,17 +56,17 @@ public class Client extends Thread
             {
                 System.out.println("Connected!!");
 
+                //delay(1);
+
                 actions = Actions.NONE;
 
-                Scanner teclado = new Scanner(System.in);
                 while (socket.isConnected())
                 {
-                    if (actions.getActionDoing() == Actions.NONE)
+                    if (actions.getAction().equals(Actions.NONE.toString()))
                     {
-                        System.out.print("What would you like to do? [help]: ");
-                        final String action = teclado.nextLine().toLowerCase();
+                        final String act = askToDo();
 
-                        switch (action)
+                        switch (act)
                         {
                             case "help":
                                 actions.sendCommandHelp();
@@ -71,10 +74,13 @@ public class Client extends Thread
                             case "list":
                                 dos.writeUTF("list");
                                 dos.flush();
+                                actions.showAvaliableDownloads(dis);
                                 break;
                             case "upload":
+                                actions.uploadFile(dis, dos, teclado);
                                 break;
                             case "download":
+                                actions.downloadFile(dis, dos, teclado);
                                 break;
                             case "close":
                                 closeConnection("You closed this program.");
@@ -82,12 +88,20 @@ public class Client extends Thread
                         }
                     }
                 }
+
                 teclado.close();
             }
             else
                 closeConnection("Your connecton have been refused by the server. Check your proxy, or contact with the System Administrator.");
         }
         catch (IOException e) { e.printStackTrace(); }
+    }
+
+    private String askToDo()
+    {
+        System.out.print("What would you like to do? [help]: ");
+        String a = teclado.nextLine().toLowerCase();
+        return a;
     }
 
     private void closeConnection(final String closeMsg) throws IOException
@@ -102,9 +116,7 @@ public class Client extends Thread
 
     private void setConnection() //Type of bookmarks "servers":["casa:1.1.1.1:3306", "trabajo:1.1.1.1:7809"]
     {
-        Scanner teclado = new Scanner(System.in);
-
-        System.out.println("New server [N] or Connect previous server [P]: ");
+        System.out.print("New server [N] or Connect previous server [P]: ");
         final String typed = teclado.nextLine().toLowerCase();
 
         if (typed.equals("n"))
@@ -122,8 +134,6 @@ public class Client extends Thread
             teclado.close();
             setConnection();
         }
-
-        teclado.close();
     }
 
     private void noHaveServers(Scanner teclado)

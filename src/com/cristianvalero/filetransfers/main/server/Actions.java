@@ -36,20 +36,33 @@ public class Actions
 
     public void sendListOfFilesAvaliable() throws IOException
     {
-        final File folder = new File(new File(".").getCanonicalPath()+"\\uploads");
-        dos.writeInt(folder.listFiles().length);
-        for (final File entry : folder.listFiles())
+        final String path = new File(".").getCanonicalPath()+"\\uploads\\";
+        final File folder = new File(path);
+        File[] files = folder.listFiles();
+
+        dos.writeInt(files.length);
+        dos.flush();
+
+        if (files.length != 0)
         {
-            if (!entry.isDirectory())
+            for (File file : files)
             {
-                dos.writeUTF(entry.getName());
-                dos.flush();
+                if (!file.isDirectory())
+                {
+                    dos.writeUTF(file.getName());
+                    dos.flush();
+                }
+                else
+                {
+                    dos.writeUTF("COOMING SOON -> "+file.getName()+"\\");
+                    dos.flush();
+                }
             }
-            else
-            {
-                dos.writeUTF("COOMING SOON -> "+entry.getName()+"\\");
-                dos.flush();
-            }
+        }
+        else
+        {
+            dos.writeUTF("There are no files to download.");
+            dos.flush();
         }
     }
 

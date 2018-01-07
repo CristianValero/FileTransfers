@@ -135,14 +135,14 @@ public class Server extends Thread
             tables = new String[]
                     {
                             "CREATE TABLE IF NOT EXISTS users_log ( id INT PRIMARY KEY AUTO_INCREMENT, adress VARCHAR(60), day VARCHAR(50), hour VARCHAR(50) ) Engine=InnoDB;",
-                            "CREATE TABLE IF NOT EXISTS uploads_log ( id INT PRIMARY KEY AUTO_INCREMENT, adress VARCHAR(60), file VARCHAR(150), size_mb float, file_path BLOB(65535), day VARCHAR(50), hour VARCHAR(50) ) Engine=InnoDB;",
-                            "CREATE TABLE IF NOT EXISTS downloads_log ( id INT PRIMARY KEY AUTO_INCREMENT, adress VARCHAR(60), file VARCHAR(150), size_mb float, file_path BLOB(65535), day VARCHAR(50), hour VARCHAR(50) ) Engine=InnoDB;",
+                            "CREATE TABLE IF NOT EXISTS uploads_log ( id INT PRIMARY KEY AUTO_INCREMENT, adress VARCHAR(60), file VARCHAR(150), size_mb VARCHAR(50), file_path TEXT, day VARCHAR(50), hour VARCHAR(50) ) Engine=InnoDB;",
+                            "CREATE TABLE IF NOT EXISTS downloads_log ( id INT PRIMARY KEY AUTO_INCREMENT, adress VARCHAR(60), file VARCHAR(150), size_mb VARCHAR(50), file_path TEXT, day VARCHAR(50), hour VARCHAR(50) ) Engine=InnoDB;",
                     };
 
-            host = "192.168.1.42";
-            name = "filetransfer";
-            user = "filetransfer";
-            password = "filetransfer";
+            host = "localhost";
+            name = "filetransfers";
+            user = "root";
+            password = "";
             driver = "com.mysql.jdbc.Driver";
             url = "jdbc:mysql://"+host+"/"+name+"?autoReconect=true";
 

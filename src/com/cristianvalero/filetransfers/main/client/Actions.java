@@ -1,14 +1,12 @@
 package com.cristianvalero.filetransfers.main.client;
 
-import com.cristianvalero.filetransfers.main.Utils.Utils;
-
 import javax.swing.*;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -19,7 +17,6 @@ public enum Actions
     NONE ("nne");
 
     private String action;
-    private Actions now;
 
     Actions(String act)
     {
@@ -29,11 +26,6 @@ public enum Actions
     public String getAction()
     {
         return action;
-    }
-
-    public Actions getActionDoing()
-    {
-        return now;
     }
 
     public void sendCommandHelp()
@@ -49,9 +41,18 @@ public enum Actions
 
     }
 
-    public void downloadFile(DataInputStream dis, DataOutputStream dos) throws IOException
+    public void showAvaliableDownloads(DataInputStream dis) throws IOException
     {
-        now = Actions.DOWNLOADING;
+        final int avaliables = dis.readInt();
+        for (int i=0; i<avaliables; i++)
+        {
+            System.out.println(dis.readUTF());
+        }
+    }
+
+    public void downloadFile(DataInputStream dis, DataOutputStream dos, Scanner teclado) throws IOException
+    {
+        action = Actions.DOWNLOADING.toString();
 
         System.out.println("There are this files avaliables to download: ");
         dos.writeUTF("list");
@@ -66,16 +67,17 @@ public enum Actions
             System.out.println(fileName);
         }
 
+        dos.writeUTF("download");
+        dos.flush();
+
         String fileToDownload;
         boolean exists;
-        Scanner teclado = new Scanner(System.in);
         do
         {
             System.out.print("Write the name of the file (case sensitive): ");
             fileToDownload = teclado.nextLine();
             exists = containsString(fileNames, fileToDownload);
         } while (!exists);
-        teclado.close();
 
         dos.writeUTF(fileToDownload);
         dos.flush();
@@ -100,7 +102,9 @@ public enum Actions
 
         Files.write(new File("C://users//"+System.getProperty("user.name")+"//Desktop//"+fileToDownload).toPath(), file);
 
-        now = Actions.NONE;
+        System.out.println("The file '"+fileToDownload+" has been downloaded.");
+
+        action = Actions.NONE.toString();
     }
 
     private boolean containsString(ArrayList<String> a, String find)
@@ -112,21 +116,26 @@ public enum Actions
         return exists;
     }
 
-    public void uploadFile(DataInputStream dis, DataOutputStream dos) throws IOException
+    public void uploadFile(DataInputStream dis, DataOutputStream dos, Scanner teclado) throws IOException
     {
-        now = Actions.UPLOADING;
+        action = Actions.UPLOADING.toString();
 
-        FileExplorer explorer = new FileExplorer("Select your file to upload: ");
+        FileExplorer explorer = new FileExplorer();
+        explorer.setVisible(true);
+        explorer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         final FileUtil file = explorer.open();
+        explorer.setVisible(false);
+        explorer.dispatchEvent(new WindowEvent(explorer, WindowEvent.WINDOW_CLOSING));
         byte[] fileBytes = Files.readAllBytes(new File(file.getPath()).toPath());
         file.setFileBytes(fileBytes);
         file.setSize(fileBytes.length);
-        fileBytes = null;
 
-        Scanner teclado = new Scanner(System.in);
         System.out.print("Are you sure want to upload the file: "+file.getFileName()+"? [y/n]: ");
         final String typed = teclado.nextLine().toLowerCase();
-        teclado.close();
+
+        dos.writeUTF("upload");
+        dos.flush();
+
         if (typed.equals("y"))
         {
             dos.writeInt(file.getSize());
@@ -149,20 +158,22 @@ public enum Actions
                     latestIndex = percnt;
                 }
             }
+
+            System.out.println("The file '"+file.getFileName()+" has been uploaded.");
         }
 
-        now = Actions.NONE;
+        action = Actions.NONE.toString();
+    }
+
+    @Override
+    public String toString()
+    {
+        return action;
     }
 
     class FileExplorer extends JFrame
     {
-        private String title;
-
-        public FileExplorer(String title)
-        {
-            this.title = title;
-            this.setTitle(title);
-        }
+        public FileExplorer() { }
 
         public FileUtil open()
         {
