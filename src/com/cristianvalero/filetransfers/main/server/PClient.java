@@ -39,7 +39,7 @@ public class PClient implements Runnable
 
             while (socket.isConnected())
             {
-                if (actions.getAction() == Actions.ActionDoing.NONE) //If is not working in any task.
+                if ((actions.getAction() == Actions.ActionDoing.NONE) && !socket.isClosed()) //If is not working in any task.
                 {
                     final String toDo = dis.readUTF().toLowerCase();
                     Utils.logMessage(address+" executed '"+Colors.BLUE+toDo+Colors.RESET+"' command.");
@@ -80,8 +80,10 @@ public class PClient implements Runnable
     private void close_all() throws IOException
     {
         Server.removeClient(this);
+
         dos.close();
         dis.close();
+
         socket.close();
         actualThread.interrupt();
     }

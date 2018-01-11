@@ -106,10 +106,13 @@ public class Client extends Thread
 
     private void closeConnection(final String closeMsg) throws IOException
     {
-        System.out.println(closeMsg);
+        dos.writeUTF("close");
+        dos.flush();
+
         socket.close();
         dis.close();
         dos.close();
+        System.out.println(closeMsg);
         this.interrupt();
         System.exit(-1);
     }
@@ -131,7 +134,6 @@ public class Client extends Thread
         else
         {
             System.out.println("Sorry, I can't understand you.");
-            teclado.close();
             setConnection();
         }
     }
